@@ -106,6 +106,10 @@ class StyleElement:
     def getName(self) -> str:
         return self.name
     
+    def getReservedKeys(self) -> list:
+
+        return []
+    
     def getStyles(self, dg: DataGrid) -> Dict[str, Any]:
         """
         Returns style arguments based on the data grid and defined rules. Note that
@@ -285,7 +289,9 @@ class Layout(FigArgs):
         super().__init__()
         self.name = 'layout'
 
-
+    def getReservedKeys(self):
+        return ["panel_width", "panel_height", "xspace", "yspace", "top", "bottom", "left", "right"]
+    
     def getStyles(self, dg: DataGrid) -> Dict[str, Any]:
         """
         Returns layout styles for the figure.
@@ -335,7 +341,10 @@ class Legend(FigArgs):
         # we reserve the key _slc to indicate the panels that should contain a legend
         self.slc_key = '_slc'
 
-        
+    def getReservedKeys(self):
+        rkeys = super().getReservedKeys()
+        rkeys.append(self.getSliceKey())
+        return rkeys
         
     def getSliceKey(self) -> str:
         """
@@ -368,7 +377,12 @@ class Annotation(StyleElement):
         self.args[self.text_key] = ''
         self.args[self.pos_key] = (0, 0)
         return
-
+    
+    def getReservedKeys(self):
+        rkeys = super().getReservedKeys()
+        rkeys.extend([self.getTextKey, self.getPosKey])
+        return rkeys
+    
     def getPosKey(self):
         return self.pos_key
     
@@ -394,13 +408,15 @@ class PanelText(Annotation, PanelArgs):
         
         super().__init__(args, kwargs)
         self.name = 'axis_text'
-
-
+        self.idx_key = '_idx'
+    
+    def getReservedKeys(self):
+        return super().getReservedKeys() + [self.idx_key]
 class XLabel(FigText):
     def __init__(self, args: Optional[Dict[str, Any]] = None, **kwargs: Any) -> None:
         super().__init__(args, **kwargs)
         self.name = 'x_label'
-
+        self.args[self.pos_key] = (0.5, 0)
     
 
 
@@ -408,16 +424,15 @@ class YLabel(FigText):
     def __init__(self, args: Optional[Dict[str, Any]] = None, **kwargs: Any) -> None:
         super().__init__(args, **kwargs)
         self.name = 'y_label'
-        
+        self.args[self.pos_key] = (0, 0.5)
 
 class ColLabel(PanelText):
     def __init__(self, args: Optional[Dict[str, Any]] = None, **kwargs: Any) -> None:
         super().__init__(args, **kwargs)
         self.name = 'col_label'
          # annotations generally only needed in one row, so we reserve a key, defaults to one
-        self.idx_key = '_idx'
         self.args[self.idx_key] = 1
-
+        self.args[self.pos_key] = (0.5, 0.95)
     
 
     def getStyles(self, dg, panel_i, panel_j):
@@ -432,12 +447,12 @@ class RowLabel(PanelText):
     def __init__(self, args: Optional[Dict[str, Any]] = None, **kwargs: Any) -> None:
         super().__init__(args, **kwargs)
         self.name = 'row_label'
-        self.idx_key = '_idx'
         self.args[self.idx_key] = 1
+        self.args[self.pos_key] = (0.05, 0.05)
 
 
     def getStyles(self, dg, panel_i, panel_j):
-        if panel_i == self.args[self.idx_key]:
+        if panel_j == self.args[self.idx_key]:
             return super().getStyles(dg, panel_i, panel_j)
         else:
             return {}

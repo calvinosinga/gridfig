@@ -148,13 +148,6 @@ class StyleManager:
 
         return
 
-    def setRowLabelIdx(self, idx):
-        self.row_idx = idx
-        return
-    
-    def setColLabelIdx(self, idx):
-        self.col_idx = idx
-        return
     
     def setRCLabels(self, row_label = None, col_label = None, condition = None):
         if row_label is not None:
@@ -236,8 +229,8 @@ class StyleManager:
                 for k in range(len(dg.panels[i, j])):
                     # we assume here that vargs is the only viz-level style element (seems safe to me)
                     styles = stem.getStyles()
-                    
-                    viz_style_arr[i, j].append()
+
+                    viz_style_arr[i, j].append(styles)
         
-        return fig_dict, 
+        return fig_dict, panel_style_arr, viz_style_arr
     
